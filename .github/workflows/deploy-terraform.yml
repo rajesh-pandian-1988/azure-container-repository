@@ -45,26 +45,26 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            registryId=$(az acr show --name terraformdockeracr --resource-group container-2023 --query id --output tsv)
+            registryId=$(az acr show --name acrterraformdocker --resource-group container-2023 --query id --output tsv)
             MSYS_NO_PATHCONV=1 az role assignment create --assignee ${{ secrets.ARM_CLIENT_ID }} --scope $registryId --role AcrPush
 
       - name: "Build and push image"
         uses: azure/docker-login@v1
         with:
-          login-server: terraformdockeracr.azurecr.io
+          login-server: acrterraformdocker.azurecr.io
           username: ${{ secrets.ARM_CLIENT_ID }}
           password: ${{ secrets.ARM_CLIENT_SECRET }}
       - run: |
-          docker build . -t terraformdockeracr.azurecr.io/sampleapp:${{ github.sha }}
-          docker push terraformdockeracr.azurecr.io/sampleapp:${{ github.sha }}
+          docker build . -t acrterraformdocker.azurecr.io/sampleapp:${{ github.sha }}
+          docker push acrterraformdocker.azurecr.io/sampleapp:${{ github.sha }}
 
       - name: "Deploy to Azure Container Instances"
         uses: "azure/aci-deploy@v1"
         with:
           resource-group: container-2023
           dns-name-label: container-2023${{ github.run_number }}
-          image: terraformdockeracr.azurecr.io/sampleapp:${{ github.sha }}
-          registry-login-server: terraformdockeracr.azurecr.io
+          image: acrterraformdocker.azurecr.io/sampleapp:${{ github.sha }}
+          registry-login-server: acrterraformdocker.azurecr.io
           registry-username: ${{ secrets.ARM_CLIENT_ID }}
           registry-password: ${{ secrets.ARM_CLIENT_SECRET }}
           name: terraform-docker-container
